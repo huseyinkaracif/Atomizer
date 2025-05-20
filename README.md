@@ -68,4 +68,4 @@ MIT
 
 ## Contact
 
-GitHub: [Your GitHub Profile](https://github.com/huseyinkaracif) 
+GitHub: [Hüseyin Karacif](https://github.com/huseyinkaracif) 
