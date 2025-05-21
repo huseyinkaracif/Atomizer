@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Particles - Synchronized 3D Scene</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+</head>
+
+<body>
+    <div id="info">
+        <div class="info-panel">
+            <h1>Cosmic Particles</h1>
+            <div class="connection-status">
+                <span id="status">Connecting...</span>
+            </div>
+            <div class="stats">
+                <p>Connected Clients: <span id="clientCount">0</span></p>
+                <p>Window ID: <span id="windowId">-</span></p>
+                <p>Position: <span id="windowPosition">X:0, Y:0</span></p>
+                <p>Size: <span id="windowSize">0x0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="scene-container"></div>
+
+    <script src="js/WindowManager.js"></script>
+    <script src="js/CosmicScene.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
