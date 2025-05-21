@@ -4,26 +4,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Particles - Synchronized 3D Scene</title>
+    <title>Atomic Model Visualization - Interactive 3D Atom</title>
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Socket.io -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <!-- THREE.js -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Debug tools -->
     <script>
-        window.addEventListener('load', function () {
+        window.onerror = function (message, source, lineno, colno, error) {
+            console.error('Global error:', message, source, lineno, error);
+            document.getElementById('error-log').innerHTML += `<div>Error: ${message} at ${source}:${lineno}</div>`;
+            document.getElementById('error-container').style.display = 'block';
+            return false;
+        };
+
+        window.addEventListener('DOMContentLoaded', function () {
+            console.log("DOM loaded");
+
+            // Check THREE.js loading
             if (typeof THREE === 'undefined') {
                 console.error('THREE is not defined! Three.js yüklenemedi!');
-                alert('Three.js kütüphanesi yüklenemedi. Lütfen sayfayı yenileyin veya internet bağlantınızı kontrol edin.');
+                document.getElementById('three-status').textContent = 'Error: Not Loaded';
+                document.getElementById('three-status').style.color = 'red';
+            } else {
+                console.log("THREE.js loaded successfully", THREE.REVISION);
+                document.getElementById('three-status').textContent = 'Loaded: v' + THREE.REVISION;
+                document.getElementById('three-status').style.color = 'green';
+            }
+
+            // Check OrbitControls loading
+            if (typeof THREE.OrbitControls === 'undefined') {
+                console.error('THREE.OrbitControls is not defined! OrbitControls yüklenemedi!');
+                document.getElementById('orbit-status').textContent = 'Error: Not Loaded';
+                document.getElementById('orbit-status').style.color = 'red';
+            } else {
+                console.log("OrbitControls loaded successfully");
+                document.getElementById('orbit-status').textContent = 'Loaded';
+                document.getElementById('orbit-status').style.color = 'green';
+            }
+
+            // Check Socket.io loading
+            if (typeof io === 'undefined') {
+                console.error('io is not defined! Socket.io yüklenemedi!');
+                document.getElementById('socket-status').textContent = 'Error: Not Loaded';
+                document.getElementById('socket-status').style.color = 'red';
+            } else {
+                console.log("Socket.io loaded successfully");
+                document.getElementById('socket-status').textContent = 'Loaded';
+                document.getElementById('socket-status').style.color = 'green';
             }
         });
+
+        // Hide loading screen after libraries are checked
+        window.addEventListener('load', function () {
+            console.log("Window loaded");
+            setTimeout(() => {
+                const loadingScreen = document.querySelector('.loading');
+                loadingScreen.classList.add('hidden');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
+    <!-- Loading screen -->
+    <div class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Atomic Model...</div>
+        <div class="loading-libraries">
+            <div>THREE.js: <span id="three-status">Checking...</span></div>
+            <div>OrbitControls: <span id="orbit-status">Checking...</span></div>
+            <div>Socket.io: <span id="socket-status">Checking...</span></div>
+        </div>
+    </div>
+
+    <!-- Error container for debug info -->
+    <div id="error-container"
+        style="display:none; position:fixed; bottom:10px; right:10px; background:rgba(255,0,0,0.8); color:white; padding:10px; border-radius:5px; z-index:1000; max-width:400px; max-height:200px; overflow:auto;">
+        <h3>Debug Info:</h3>
+        <div id="error-log"></div>
+        <button onclick="this.parentNode.style.display='none'" style="margin-top:10px; padding:5px;">Close</button>
+    </div>
+
     <div id="info">
         <div class="info-panel">
-            <h1>Cosmic Particles</h1>
+            <h1>Atomic Model Visualization</h1>
             <div class="connection-status">
                 <span id="status">Connecting...</span>
             </div>
@@ -32,6 +107,11 @@
                 <p>Window ID: <span id="windowId">-</span></p>
                 <p>Position: <span id="windowPosition">X:0, Y:0</span></p>
                 <p>Size: <span id="windowSize">0x0</span></p>
+            </div>
+            <div class="tip">
+                Use your mouse to rotate, zoom and pan the atom model.<br>
+                Visit <a href="/control-panel.html" target="_blank" style="color:#3a86ff;">Control Panel</a> to adjust
+                settings.
             </div>
         </div>
     </div>
