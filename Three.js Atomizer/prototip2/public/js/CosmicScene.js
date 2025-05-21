@@ -1,5 +1,6 @@
 class CosmicScene {
   constructor(container) {
+    console.log("CosmicScene oluşturuluyor...");
     // Scene settings - will be updated from server
     this.settings = {
       particles: {
@@ -19,8 +20,21 @@ class CosmicScene {
 
     // Setup Three.js components
     this.container = container;
+    console.log("Container:", container);
+
+    if (!THREE) {
+      console.error("THREE kütüphanesi bulunamadı!");
+      return;
+    }
+
+    // THREE.js nesnelerini oluştur
     this.scene = new THREE.Scene();
+    console.log("Scene oluşturuldu");
+
+    // Set the initial background color
+    this.scene.background = new THREE.Color(this.settings.background.color);
     this.clock = new THREE.Clock();
+
     this.setupCamera();
     this.setupRenderer();
     this.setupLights();
@@ -40,37 +54,68 @@ class CosmicScene {
     // Animation loop
     this.animate = this.animate.bind(this);
     this.animate();
+    console.log("CosmicScene başarıyla oluşturuldu");
   }
 
   setupCamera() {
-    // Create a perspective camera
-    this.camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      2000
-    );
-    this.camera.position.z = 700;
+    try {
+      // Create a perspective camera
+      this.camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        2000
+      );
+      this.camera.position.z = 700;
+      console.log("Kamera oluşturuldu");
 
-    // Add orbit controls for interactive movement
-    this.controls = new THREE.OrbitControls(this.camera, this.container);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
-    this.controls.rotateSpeed = 0.5;
+      // Add orbit controls for interactive movement
+      if (THREE.OrbitControls) {
+        this.controls = new THREE.OrbitControls(
+          this.camera,
+          this.renderer ? this.renderer.domElement : this.container
+        );
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        this.controls.rotateSpeed = 0.5;
+        console.log("OrbitControls oluşturuldu");
+      } else {
+        console.error("THREE.OrbitControls bulunamadı!");
+      }
+    } catch (error) {
+      console.error("Kamera oluşturulurken hata:", error);
+    }
   }
 
   setupRenderer() {
-    // Create WebGL renderer
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-    });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.container.appendChild(this.renderer.domElement);
+    try {
+      // Create WebGL renderer
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
+      this.renderer.setPixelRatio(window.devicePixelRatio);
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.container.appendChild(this.renderer.domElement);
+      console.log("Renderer oluşturuldu");
 
-    // Add window resize listener
-    window.addEventListener("resize", () => this.onWindowResize());
+      // OrbitControls renderer oluşturulduktan sonra yeniden ataması yap
+      if (typeof THREE.OrbitControls !== "undefined" && this.camera) {
+        this.controls = new THREE.OrbitControls(
+          this.camera,
+          this.renderer.domElement
+        );
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        this.controls.rotateSpeed = 0.5;
+        console.log("OrbitControls yeniden tanımlandı");
+      }
+
+      // Add window resize listener
+      window.addEventListener("resize", () => this.onWindowResize());
+    } catch (error) {
+      console.error("Renderer oluşturulurken hata:", error);
+    }
   }
 
   setupLights() {

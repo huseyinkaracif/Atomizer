@@ -190,7 +190,6 @@
 
     <script>
         // Global variables
-        const socket = io();
         let connectedClients = [];
         let settings = {
             particles: {
@@ -208,8 +207,17 @@
             }
         };
 
+        // Socket.io bağlantısı
+        let socket;
+
         // Initialize the control panel
         function init() {
+            console.log("Kontrol paneli başlatılıyor...");
+
+            // Socket.io bağlantısını kur
+            socket = io();
+            console.log("Socket.io bağlantısı kuruldu");
+
             // Set up Socket.io event listeners
             setupSocketListeners();
 
@@ -223,20 +231,29 @@
         // Set up Socket.io event listeners
         function setupSocketListeners() {
             socket.on('connect', () => {
+                console.log("Socket.io bağlantısı başarılı, ID:", socket.id);
                 updateConnectionStatus(true);
             });
 
             socket.on('disconnect', () => {
+                console.log("Socket.io bağlantısı kesildi");
+                updateConnectionStatus(false);
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error("Socket.io bağlantı hatası:", error);
                 updateConnectionStatus(false);
             });
 
             socket.on('clientsUpdate', (clients) => {
+                console.log("Client listesi güncellendi:", clients);
                 connectedClients = clients;
                 updateClientsList();
                 updateWindowsVisualization();
             });
 
             socket.on('sceneState', (sceneState) => {
+                console.log("Sahne durumu güncellendi:", sceneState);
                 updateSettings(sceneState);
             });
         }

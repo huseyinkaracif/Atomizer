@@ -6,43 +6,76 @@ let isFirstWindow = false;
 
 // Initialize the application
 function init() {
-  // Create the window manager
-  windowManager = new WindowManager();
+  console.log("Ana uygulama başlatılıyor...");
 
-  // Set up the container for the scene
-  container = document.getElementById("scene-container");
+  try {
+    // Set up the container for the scene
+    container = document.getElementById("scene-container");
+    if (!container) {
+      console.error("scene-container elementi bulunamadı!");
+      return;
+    }
+    console.log("Container bulundu:", container);
 
-  // Create and initialize the 3D scene
-  cosmicScene = new CosmicScene(container);
+    // THREE ve dependencies kontrolü
+    if (typeof THREE === "undefined") {
+      console.error("THREE kütüphanesi yüklenemedi!");
+      alert("Three.js kütüphanesi bulunamadı. Lütfen sayfayı yenileyin.");
+      return;
+    }
 
-  // Hook up the settings changed callback
-  cosmicScene.onSettingsChanged = (settings) => {
-    // Send updated settings to server
-    windowManager.updateSceneState(settings);
-  };
+    // Socket.io kontrolü
+    if (typeof io === "undefined") {
+      console.error("Socket.io kütüphanesi yüklenemedi!");
+      alert("Socket.io kütüphanesi bulunamadı. Lütfen sayfayı yenileyin.");
+      return;
+    }
 
-  // Connect to the server
-  windowManager.connect();
+    // Create the window manager
+    console.log("WindowManager oluşturuluyor...");
+    windowManager = new WindowManager();
 
-  // Register callbacks for window manager events
-  windowManager
-    .onWindowsChanged((windows) => {
-      // Update window visualizations
-      cosmicScene.updateWindowVisualizations(
-        windows,
-        windowManager.getWindowId()
-      );
+    // Create and initialize the 3D scene
+    console.log("CosmicScene oluşturuluyor...");
+    cosmicScene = new CosmicScene(container);
 
-      // Check if this is the first window (for control panel)
-      checkIfFirstWindow(windows);
-    })
-    .onSceneStateChanged((sceneState) => {
-      // Update scene settings from server
-      cosmicScene.updateSettings(sceneState);
-    });
+    // Hook up the settings changed callback
+    cosmicScene.onSettingsChanged = (settings) => {
+      // Send updated settings to server
+      console.log("Ayarlar değiştirildi, sunucuya gönderiliyor:", settings);
+      windowManager.updateSceneState(settings);
+    };
 
-  // Handle keyboard shortcuts
-  document.addEventListener("keydown", handleKeyboardShortcuts);
+    // Connect to the server
+    console.log("Sunucuya bağlanılıyor...");
+    windowManager.connect();
+
+    // Register callbacks for window manager events
+    windowManager
+      .onWindowsChanged((windows) => {
+        console.log("Pencere listesi güncellendi:", windows);
+        // Update window visualizations
+        cosmicScene.updateWindowVisualizations(
+          windows,
+          windowManager.getWindowId()
+        );
+
+        // Check if this is the first window (for control panel)
+        checkIfFirstWindow(windows);
+      })
+      .onSceneStateChanged((sceneState) => {
+        console.log("Sahne durumu güncellendi:", sceneState);
+        // Update scene settings from server
+        cosmicScene.updateSettings(sceneState);
+      });
+
+    // Handle keyboard shortcuts
+    document.addEventListener("keydown", handleKeyboardShortcuts);
+
+    console.log("Uygulama başlatıldı");
+  } catch (error) {
+    console.error("Uygulama başlatılırken hata:", error);
+  }
 }
 
 // Check if this is the first connected window to show controls

@@ -122,7 +122,7 @@ class WindowManager {
 
   // Register callback for window shape changes (position/size)
   onWindowShapeChanged(callback) {
-    this.windowShapeCallbacks.push(callback);
+    this.windowShapeChangeCallbacks.push(callback);
     return this;
   }
 
@@ -147,7 +147,9 @@ class WindowManager {
 
   // Notify all registered callbacks of window shape changes
   notifyWindowShapeChanged() {
-    this.windowShapeCallbacks.forEach((callback) => callback(this.windowInfo));
+    this.windowShapeChangeCallbacks.forEach((callback) =>
+      callback(this.windowInfo)
+    );
   }
 
   // Notify all registered callbacks of connection status changes

@@ -5,7 +5,20 @@ const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+// Socket.io için CORS ayarları ekliyorum
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Geliştirme için tüm originslerden bağlantıya izin veriyoruz
+    methods: ["GET", "POST"],
+  },
+});
+
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
@@ -30,7 +43,9 @@ let sceneState = {
 
 // Socket.io connection handling
 io.on("connection", (socket) => {
-  console.log(`Client connected: ${socket.id}`);
+  console.log(
+    `Client connected: ${socket.id} - IP: ${socket.handshake.address}`
+  );
 
   // Add client to our map
   clients.set(socket.id, {
@@ -40,11 +55,15 @@ io.on("connection", (socket) => {
     connected: Date.now(),
   });
 
+  console.log(`Toplam bağlı client sayısı: ${clients.size}`);
+
   // Send current scene state to new client
   socket.emit("sceneState", sceneState);
+  console.log("Scene state sent to client:", socket.id);
 
   // Send list of all connected clients to everyone
   io.emit("clientsUpdate", Array.from(clients.values()));
+  console.log("Client listesi tüm clientlara gönderildi");
 
   // Handle client window updates
   socket.on("windowUpdate", (data) => {
@@ -60,24 +79,39 @@ io.on("connection", (socket) => {
 
   // Handle scene state updates from control panel
   socket.on("updateSceneState", (newState) => {
+    console.log("Scene state update from client:", socket.id, newState);
+
     // Merge new settings with existing state
     sceneState = { ...sceneState, ...newState };
 
     // Broadcast updated scene state to all clients
     io.emit("sceneState", sceneState);
-    console.log("Scene state updated:", sceneState);
+    console.log("Updated scene state sent to all clients");
   });
 
   // Handle client disconnection
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
     clients.delete(socket.id);
+    console.log(`Kalan client sayısı: ${clients.size}`);
     io.emit("clientsUpdate", Array.from(clients.values()));
   });
+});
+
+// Add route for root
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Add route for control panel
+app.get("/control-panel", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "control-panel.html"));
 });
 
 // Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Main application: http://localhost:${PORT}`);
+  console.log(`Control panel: http://localhost:${PORT}/control-panel.html`);
 });
