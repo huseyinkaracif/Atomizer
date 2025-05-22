@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gelişmiş Three.js Atom Animasyonu</title>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			box-sizing: border-box;
+		}
+
+		body {
+			background-color: #000;
+			font-family: Arial, sans-serif;
+			color: white;
+			position: relative;
+		}
+
+		canvas {
+			display: block;
+			position: fixed;
+			top: 0;
+			left: 0;
+			z-index: 1;
+		}
+
+		.info {
+			position: fixed;
+			bottom: 20px;
+			left: 20px;
+			background-color: rgba(0, 0, 0, 0.5);
+			padding: 10px 15px;
+			border-radius: 5px;
+			font-size: 14px;
+			z-index: 2;
+			opacity: 0.7;
+			transition: opacity 0.3s;
+		}
+
+		.info:hover {
+			opacity: 1;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="info">
+		Çoklu pencere desteği ile gelişmiş atom animasyonu
+	</div>
+	<script type="module" src="main.js"></script>
+</body>
+
+</html>
